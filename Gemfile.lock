@@ -1,0 +1,14 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    json (1.8.1)
+    memoize (1.3.1)
+      test-unit (>= 2.0.2)
+    test-unit (2.5.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  json
+  memoize
