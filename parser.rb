@@ -94,7 +94,7 @@ class HangulParser
 		end
 
 		ri = r.begin + hangul[r].rindex(" ")
-		return r.begin..ri, ri+1..r.last
+		return r.begin..ri-1, ri+1..r.last
 	end
 
 	def frazo r
@@ -108,7 +108,7 @@ class HangulParser
 			end
 		end
 
-		puts ['frazo', r, candidates.min].to_yaml
+		puts JSON.pretty_generate ['frazo', r, candidates.min]
 
 		return candidates.min
 	end
@@ -121,7 +121,7 @@ class HangulParser
 				[verbo(r.first..r.last, 1)[1], "ㅁ"]
 			]
 		end
-		puts ['substantivo', r, candidates.min].to_yaml
+		puts JSON.pretty_generate ['substantivo', r, candidates.min]
 		return candidates.min
 	end
 
@@ -134,34 +134,31 @@ class HangulParser
 
 		(left, right) = bipartite(r, k)
 
-		if vorto = rompita_vortaro[hangul[right]]
-			if vorto.include? :verbo
+		if vorto = rompita_vortaro[hangul[right]] and vorto.include? :verbo
+			left.reverse_each do |i|
+				josa(i..left.last)
 				c = [
-					1, hangul[right]
+					
 				]
-				candidates.push c
 			end
+			c = [
+				1, hangul[right]
+			]
+			candidates.push c
 		end
 		
-
-#		candidates.push [
-#			0, hangul[r]
-#		]
-
-		puts ['verbo', r, candidates.min].to_yaml
+		puts JSON.pretty_generate ['verbo', r, candidates.min]
 		return candidates.min
 	end
 
 	def josa r
 		candidates = [[999999, nil]]
-		if vorto = rompita_vortaro[splitted_hangul[r.last]]
-			if vorto.include? :josa
-				candidates.push [
-					1 + substantivo(r.first..r.last-1)[0],
-					substantivo(r.first..r.last-1)[1],
-					vorto
-				]
-			end
+		if vorto = rompita_vortaro[splitted_hangul[r.last]] and vorto.include? :josa
+			candidates.push [
+				1 + substantivo(r.first..r.last-1)[0],
+				substantivo(r.first..r.last-1)[1],
+				vorto
+			]
 		end
 	end
 end
