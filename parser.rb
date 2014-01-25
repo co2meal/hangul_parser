@@ -39,7 +39,7 @@ class HangulParser
       end
     end
 
-    puts JSON.pretty_generate ['frazo', r, candidates.min]
+    # puts JSON.pretty_generate ['frazo', r, candidates.min]
 
     return candidates.min
   end
@@ -49,9 +49,20 @@ class HangulParser
 
     if vorto = dict[hangul.string(r)] and vorto.include? :substantivo
     	value = 1
-    	lisp = [:substantivo, hangul.splitted(r,k)]
+    	lisp = [:substantivo, hangul.string(r,k)]
       candidates.push [value, lisp]
     end
+
+
+    r.each do |i|
+    	if hangul.splitted(r, k)[i-r.first] == " "
+	    	value = 1 + adjektivo(r.first..i-1, 0)[0] + substantivo(i+1..r.last, k)[0]
+	    	lisp = [:substantivo, adjektivo(r.first..i-1, 0)[1]] + substantivo(i+1..r.last, k)[1][1..-1]
+
+		    candidates.push [value, lisp]
+	    end
+    end
+
 
     if hangul.splitted(r.last, k)[2] == "ㅁ"
     	value = 1 + verbo(r.first..r.last, 1)[0]
@@ -59,9 +70,9 @@ class HangulParser
       candidates.push [value, lisp]
     end
 
-    puts 'substantivo'
-    puts JSON.pretty_generate hangul.splitted(r, k)
-    puts JSON.pretty_generate candidates.min
+    # puts 'substantivo'
+    # puts JSON.pretty_generate hangul.splitted(r, k)
+    # puts JSON.pretty_generate candidates.min
 
 
     return candidates.min
@@ -73,7 +84,7 @@ class HangulParser
 
     if vorto = dict[hangul.string(r,k)] and vorto.include? :verbo
     	value = 1
-    	lisp = [:verbo, hangul.splitted(r,k)]
+    	lisp = [:verbo, hangul.string(r,k)]
     	candidates.push [value, lisp]
     end
 
@@ -86,9 +97,9 @@ class HangulParser
 	    end
     end
 
-    puts 'verbo'
-    puts JSON.pretty_generate hangul.splitted(r, k)
-    puts JSON.pretty_generate candidates.min
+    # puts 'verbo'
+    # puts JSON.pretty_generate hangul.splitted(r, k)
+    # puts JSON.pretty_generate candidates.min
     return candidates.min
   end
 
@@ -99,14 +110,31 @@ class HangulParser
     if vorto = dict[hangul.string(r.last)] and vorto.include? :jxosa
 
     	value = 1 + substantivo(r.first..r.last-1, 0)[0]
-    	lisp = [:jxosa, substantivo(r.first..r.last-1, 0)[1], hangul.splitted(r.last)]
+    	lisp = [:jxosa, substantivo(r.first..r.last-1, 0)[1], hangul.string(r.last)]
 
 	    candidates.push [value, lisp]
-
     end
-    puts 'jxosa'
-    puts JSON.pretty_generate hangul.splitted(r)
-    puts JSON.pretty_generate candidates
+    # puts 'jxosa'
+    # puts JSON.pretty_generate hangul.splitted(r)
+    # puts JSON.pretty_generate candidates
+    return candidates.min
+  end
+
+  def adjektivo r, k
+    candidates = [[999999, [:fail_adjektivo]]]
+    return candidates.min if r.count == 0
+
+    if hangul.string(r.last) == "의"
+    	value = 1 + substantivo(r.first..r.last-1, 0)[0]
+    	lisp = [:adjektivo, substantivo(r.first..r.last-1, 0)[1], "의"]
+
+    	candidates.push [value, lisp]
+    end
+
+    # puts 'adjektivo'
+    # puts JSON.pretty_generate hangul.splitted(r, k)
+    # puts JSON.pretty_generate candidates.min
+
     return candidates.min
   end
 end

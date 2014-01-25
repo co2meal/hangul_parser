@@ -9,6 +9,7 @@ class Hangul
     @string = string
     @splitted_hangul = hangul_split(string)
     memoize :splitted
+    memoize :string
   end
 
   def splitted(range = nil, k = 0)
